@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Root Robot Python Web App</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css">
+    <script type="text/javascript">
+      if (!window.navigator.bluetooth || !window.showOpenFilePicker || !window.showSaveFilePicker) {
+        window.alert("Your browser is not supported. Please use Chrome.");
+      }
+    </script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.18.1/full/pyodide.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13/ace.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13/mode-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13/ext-language_tools.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13/theme-nord_dark.min.js"></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+      var pyodide;
+      async function main() {
+        pyodide = await loadPyodide({
+          indexURL : "https://cdn.jsdelivr.net/pyodide/v0.18.1/full/"
+        });
+        pyodide.runPythonAsync(`
+from sys import path
+from io import BytesIO
+from zipfile import ZipFile
+from js import fetch
+
+response = await fetch("./app.zip")
+buffer = await response.arrayBuffer()
+with ZipFile(BytesIO(buffer.to_py()), "r") as zip:
+    zip.extractall(path[-1])
+
+from app import main
+await main()
+        `);
+      await pyodide.loadPackage("micropip");
+      }
+      main();
+    </script>
+    <h1>Root Robot Python Web App</h1>
+    <button type="button" id="connect" disabled>Connect</button>
+    <button type="button" id="play" disabled>Play</button>
+    <button type="button" id="open">Open</button>
+    <button type="button" id="save">Save</button>
+    <br><br><label for="editor">Code:</label>
+    <div id="editor" style="width:621px;"># Press Connect to connect to robot over Bluetooth
+# Press Play to run this Python code and Stop to stop
+# Use Open and Save to work on a local Python file
+
+# Use robot object to control Bluetooth robot
+# Don't forget to await any async methods
+name = await robot.get_name()
+print(f"hello {name}")  # any output will be printed below
+
+help(robot)  # explore robot methods using help function</div>
+    <br><label for="output">Output:</label><br>
+    <textarea id="output" rows="4" cols="73" style="font-family:monospace" readonly></textarea>
+    <br><label>Examples:</label><br>
+    <button type="button" id="events">Events</button>
+    <button type="button" id="matplotlib">Matplotlib</button>
+    <button type="button" id="micropip">Micropip</button>
+    <script>
+      var editor = ace.edit("editor");
+      editor.session.setMode("ace/mode/python");
+      editor.setOptions({
+        minLines:10,
+        maxLines:40,
+        enableBasicAutocompletion: true,
+        enableLiveAutocompletion: true,
+      });
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches) {
+          editor.setTheme("ace/theme/nord_dark");
+      }
+    </script>
+    <a class="github-fork-ribbon" href="https://github.com/mogenson/root-robot-python-web-app" data-ribbon="View on GitHub" title="View on GitHub">View on GitHub</a>
+  </body>
+  <footer style="width:621px">
+    <pre>&copy; 2021 Michael Mogenson. "Root Robot" is a trademark of iRobot Corporation.</pre>
+  </footer>
+</html>
