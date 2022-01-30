@@ -12,7 +12,7 @@
         window.alert("Your browser is not supported. Please use Chrome.");
       }
     </script>
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.18.1/full/pyodide.js"></script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.19.0/full/pyodide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13/ace.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13/mode-python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13/ext-language_tools.min.js"></script>
@@ -23,10 +23,9 @@
       var pyodide;
       async function main() {
         pyodide = await loadPyodide({
-          indexURL : "https://cdn.jsdelivr.net/pyodide/v0.18.1/full/"
+          indexURL : "https://cdn.jsdelivr.net/pyodide/v0.19.0/full/"
         });
         pyodide.runPythonAsync(`
-from sys import path
 from io import BytesIO
 from zipfile import ZipFile
 from js import fetch
@@ -34,7 +33,7 @@ from js import fetch
 response = await fetch("./app.zip")
 buffer = await response.arrayBuffer()
 with ZipFile(BytesIO(buffer.to_py()), "r") as zip:
-    zip.extractall(path[-1])
+    zip.extractall()
 
 from app import main
 await main()

@@ -20,6 +20,7 @@ class Robot:
         self._loop = get_running_loop()
         self._responses = {}
         self._events = defaultdict(list)
+        self._tasks = {}
         self._inc = 0
         self._running = False
         self._enable_motors = True
@@ -368,6 +369,7 @@ class Robot:
         """Enable the event handlers and robot communication"""
         self._responses = {}
         self._events = defaultdict(list)
+        self._tasks = {}
         # on stop handler
         self._events[(0, 4)].append((lambda packet: packet, lambda packet: self.stop()))
         # on stall handler
@@ -409,14 +411,17 @@ class Robot:
         key = (packet.dev, packet.cmd, packet.inc)
         if key in self._responses:
             future = self._responses.pop(key)
-            future.set_result(packet)
+            if future and not future.done() and not future.cancelled():
+                future.set_result(packet)
 
         key = (packet.dev, packet.cmd)
         if key in self._events:
             for (filter, callback) in self._events[key]:
                 args = filter(packet)
                 if args:
-                    self._loop.create_task(callback(args))
+                    if key in self._tasks:
+                        self._tasks[key].cancel()
+                    self._tasks[key] = self._loop.create_task(callback(args))
 
     async def write_packet(self, packet: Packet):
         """Send a packet to robot"""

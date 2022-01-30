@@ -40,8 +40,9 @@ class Bluetooth:
             RX_CHARACTERISTIC
         )
         await self.rx_characteristic.startNotifications()
+        proxy_data_received = pyodide.create_proxy(self._data_received)
         self.rx_characteristic.addEventListener(
-            "characteristicvaluechanged", self._data_received
+            "characteristicvaluechanged", proxy_data_received
         )
 
     def is_connected(self):
